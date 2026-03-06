@@ -25,6 +25,8 @@
   <button type="submit" class="btn">Register Patient</button>
 </form>
 <script>
+const API_BASE_URL = 'https://palliative-backend.onrender.com';
+
 document.getElementById('patientForm').addEventListener('submit', async function(e){
     e.preventDefault();
     if(!this.checkValidity()){
@@ -39,7 +41,7 @@ document.getElementById('patientForm').addEventListener('submit', async function
         priority: document.getElementById('patientPriority').value
     };
     try{
-        let res = await fetch('/api/patients', {
+        let res = await fetch(API_BASE_URL + '/api/patients', {
             method: 'POST',
             headers: {'Content-Type':'application/json'},
             body: JSON.stringify(data)

@@ -210,6 +210,8 @@ table tbody tr:nth-child(even) { background: #f9fafb; }
 </div>
 
 <script>
+const API_BASE_URL = 'https://palliative-backend.onrender.com';
+
 window.addEventListener('DOMContentLoaded', () => {
   let password = prompt("Enter Admin Password:");
   if(password !== "admin123"){
@@ -240,7 +242,7 @@ function switchTab(e, tabName) {
 
 async function loadDashboard() {
   try{
-    let res = await fetch('/api/stats');
+    let res = await fetch(API_BASE_URL + '/api/stats');
     if(!res.ok) throw new Error('Failed to fetch stats');
     let data = await res.json();
     document.getElementById('stat-patients').textContent = data.patients || 0;
@@ -261,7 +263,7 @@ async function addEquipment(){
     return;
   }
   try{
-    let res = await fetch('/api/equipments', {
+    let res = await fetch(API_BASE_URL + '/api/equipments', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({name, qty})
@@ -285,11 +287,11 @@ async function removeEquipment(){
     return;
   }
   try{
-    let res2 = await fetch('/api/equipments');
+    let res2 = await fetch(API_BASE_URL + '/api/equipments');
     let all = await res2.json();
     let current = all[name] || 0;
     let newQty = Math.max(0, current - qty);
-    let res = await fetch('/api/equipments/'+encodeURIComponent(name), {
+    let res = await fetch(API_BASE_URL + '/api/equipments/'+encodeURIComponent(name), {
       method:'PUT',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({qty:newQty})
@@ -307,7 +309,7 @@ async function removeEquipment(){
 
 async function loadEquipmentInventory() {
   try{
-    let res = await fetch('/api/equipments');
+    let res = await fetch(API_BASE_URL + '/api/equipments');
     if(!res.ok) throw new Error('Failed to fetch equipment');
     let equipments = await res.json();
     let tbody = document.getElementById('inventoryBody');
@@ -329,7 +331,7 @@ async function loadEquipmentInventory() {
 
 async function loadOrders() {
   try{
-    let res = await fetch('/api/orders');
+    let res = await fetch(API_BASE_URL + '/api/orders');
     if(!res.ok) throw new Error('Failed to fetch orders');
     let orders = await res.json();
     let tbody = document.getElementById('ordersBody');
@@ -351,7 +353,7 @@ async function loadOrders() {
 async function clearOrder(id){
   if(confirm('Clear this order?')){
     try{
-      let res = await fetch('/api/orders/'+id, { method: 'DELETE' });
+      let res = await fetch(API_BASE_URL + '/api/orders/'+id, { method: 'DELETE' });
       if(res.ok){
         alert('Order cleared');
         loadOrders();
@@ -365,7 +367,7 @@ async function clearOrder(id){
 
 async function loadDonations() {
   try{
-    let res = await fetch('/api/donations');
+    let res = await fetch(API_BASE_URL + '/api/donations');
     if(!res.ok) throw new Error('Failed to fetch donations');
     let donations = await res.json();
     let tbody = document.getElementById('donationsBody');
@@ -385,7 +387,7 @@ async function loadDonations() {
 
 async function loadPatients() {
   try{
-    let res = await fetch('/api/patients');
+    let res = await fetch(API_BASE_URL + '/api/patients');
     if(!res.ok) throw new Error('Failed to fetch patients');
     let patients = await res.json();
     let tbody = document.getElementById('patientsBody');

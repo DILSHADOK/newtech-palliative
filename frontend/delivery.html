@@ -16,10 +16,12 @@
 </section>
 
 <script>
+const API_BASE_URL = 'https://palliative-backend.onrender.com';
+
 // render equipments with order controls using backend
 async function loadEquipments() {
     try{
-        let res = await fetch('/api/equipments');
+        let res = await fetch(API_BASE_URL + '/api/equipments');
         let equipments = await res.json();
         let container = document.getElementById('orderContainer');
         container.innerHTML = '';
@@ -49,7 +51,7 @@ async function placeOrder(name) {
     }
     // send to backend
     try{
-        let res = await fetch('/api/orders', {
+        let res = await fetch(API_BASE_URL + '/api/orders', {
             method: 'POST',
             headers: {'Content-Type':'application/json'},
             body: JSON.stringify({name, qty})

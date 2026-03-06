@@ -25,10 +25,11 @@
 </div>
 </section>
 <script>
+const API_BASE_URL = 'https://palliative-backend.onrender.com';
 
 async function refreshEquipments(){
     try{
-        let res = await fetch('/api/equipments');
+        let res = await fetch(API_BASE_URL + '/api/equipments');
         let equipments = await res.json();
         let grid = document.getElementById("equipmentGrid");
         grid.innerHTML = `

@@ -43,11 +43,13 @@
 </section>
 
 <script>
+const API_BASE_URL = 'https://palliative-backend.onrender.com';
+
 async function renderHistory(){
     let list = document.getElementById('donationHistory');
     list.innerHTML = '';
     try{
-        let res = await fetch('/api/donations');
+        let res = await fetch(API_BASE_URL + '/api/donations');
         let history = await res.json();
         if(history.length === 0) {
             list.innerHTML = '<li>No donations yet.</li>';
@@ -73,7 +75,7 @@ document.getElementById('donationForm').addEventListener('submit', async functio
     let method = document.getElementById('donationMethod').value;
 
     try{
-        let res = await fetch('/api/donations', {
+        let res = await fetch(API_BASE_URL + '/api/donations', {
             method: 'POST',
             headers:{'Content-Type':'application/json'},
             body: JSON.stringify({name,email,amount,method})
