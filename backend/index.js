@@ -55,6 +55,27 @@ const initTables = async () => {
       priority TEXT,
       time TEXT
     )`);
+    
+    // Seed initial equipment data if table is empty
+    const equipCheck = await pool.query('SELECT COUNT(*) as count FROM equipments');
+    if (parseInt(equipCheck.rows[0].count) === 0) {
+      const equipments = [
+        { name: 'Wheelchair', qty: 5 },
+        { name: 'Oxygen Cylinder', qty: 8 },
+        { name: 'Hospital Bed', qty: 3 },
+        { name: 'Suction Machine', qty: 4 },
+        { name: 'Nebulizer', qty: 6 }
+      ];
+      
+      for (const eq of equipments) {
+        await pool.query(
+          'INSERT INTO equipments (name, qty) VALUES ($1, $2)',
+          [eq.name, eq.qty]
+        );
+      }
+      console.log('Initial equipment data seeded');
+    }
+    
     console.log('Tables initialized successfully');
   } catch (err) {
     console.error('Error initializing tables:', err);

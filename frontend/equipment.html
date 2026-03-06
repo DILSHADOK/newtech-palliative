@@ -25,7 +25,9 @@
 </div>
 </section>
 <script>
-const API_BASE_URL = 'https://palliative-backend.onrender.com';
+const API_BASE_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:3000' 
+  : 'https://palliative-backend.onrender.com';
 
 async function refreshEquipments(){
     try{

@@ -210,7 +210,9 @@ table tbody tr:nth-child(even) { background: #f9fafb; }
 </div>
 
 <script>
-const API_BASE_URL = 'https://palliative-backend.onrender.com';
+const API_BASE_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:3000' 
+  : 'https://palliative-backend.onrender.com';
 
 window.addEventListener('DOMContentLoaded', () => {
   let password = prompt("Enter Admin Password:");
