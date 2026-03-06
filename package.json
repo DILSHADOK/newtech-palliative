@@ -1,0 +1,14 @@
+{
+  "name": "palliative",
+  "version": "1.0.0",
+  "description": "Palliative care application",
+  "main": "backend/index.js",
+  "scripts": {
+    "start": "node backend/index.js",
+    "dev": "node backend/index.js",
+    "install": "npm install --prefix backend"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
