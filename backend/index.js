@@ -14,7 +14,12 @@ const db = {
   query: (text, params) => pool.query(text, params),
   run: (text, params, callback) => pool.query(text, params).then(() => callback(null)).catch(err => callback(err)),
   get: (text, params, callback) => pool.query(text, params).then(res => callback(null, res.rows[0])).catch(err => callback(err)),
-  all: (text, params, callback) => pool.query(text, params).then(res => callback(null, res.rows)).catch(err => callback(err))
+  all: (text, paramsOrCallback, callback) => {
+    // Handle both (text, callback) and (text, params, callback) signatures
+    const actualParams = typeof paramsOrCallback === 'function' ? [] : paramsOrCallback;
+    const actualCallback = typeof paramsOrCallback === 'function' ? paramsOrCallback : callback;
+    pool.query(text, actualParams).then(res => actualCallback(null, res.rows)).catch(err => actualCallback(err));
+  }
 };
 
 // initialize tables
@@ -169,6 +174,29 @@ app.get('/api/stats', async (req, res) => {
       totalUnits: parseInt(totalUnitsRes.rows[0].total) || 0
     };
     res.json(stats);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Helper endpoint to seed initial data (for setup)
+app.post('/api/seed', async (req, res) => {
+  try {
+    const equipments = [
+      { name: 'Wheelchair', qty: 5 },
+      { name: 'Oxygen Cylinder', qty: 8 },
+      { name: 'Hospital Bed', qty: 3 },
+      { name: 'Suction Machine', qty: 4 },
+      { name: 'Nebulizer', qty: 6 }
+    ];
+    
+    for (const eq of equipments) {
+      await pool.query(
+        'INSERT INTO equipments (name, qty) VALUES ($1, $2) ON CONFLICT(name) DO UPDATE SET qty = $2',
+        [eq.name, eq.qty]
+      );
+    }
+    res.json({ success: true, message: 'Sample data added' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

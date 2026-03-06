@@ -22,9 +22,16 @@ const API_BASE_URL = 'https://palliative-backend.onrender.com';
 async function loadEquipments() {
     try{
         let res = await fetch(API_BASE_URL + '/api/equipments');
+        if(!res.ok) throw new Error(`API Error: ${res.status}`);
         let equipments = await res.json();
         let container = document.getElementById('orderContainer');
         container.innerHTML = '';
+        
+        if(!equipments || Object.keys(equipments).length === 0) {
+            container.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;"><p>No equipment available at the moment. Please check back later.</p></div>';
+            return;
+        }
+        
         for (let name in equipments) {
             let qty = equipments[name];
             let card = document.createElement('div');
@@ -39,6 +46,7 @@ async function loadEquipments() {
         }
     } catch(e){
         console.error('load equip failed', e);
+        document.getElementById('orderContainer').innerHTML = '<div style="text-align: center; padding: 40px; color: red;"><p>Error loading equipment. Please refresh the page.</p></div>';
     }
 }
 
