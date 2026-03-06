@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Delivery Status</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav><h2>PalliativeCare+</h2><ul><li><a href="index.html">Home</a></li></ul></nav>
+
+<section class="container">
+<h2 class="section-title">Order Equipment</h2>
+
+<div id="orderContainer" class="grid"></div>
+
+</section>
+
+<script>
+// render equipments with order controls using backend
+async function loadEquipments() {
+    try{
+        let res = await fetch('/api/equipments');
+        let equipments = await res.json();
+        let container = document.getElementById('orderContainer');
+        container.innerHTML = '';
+        for (let name in equipments) {
+            let qty = equipments[name];
+            let card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                <h3>${name}</h3>
+                <p>Available: <strong>${qty}</strong></p>
+                <input type="number" min="1" max="${qty}" placeholder="Quantity" id="order-${name}" />
+                <button class="btn" onclick="placeOrder('${name}')">Order</button>
+            `;
+            container.appendChild(card);
+        }
+    } catch(e){
+        console.error('load equip failed', e);
+    }
+}
+
+async function placeOrder(name) {
+    let input = document.getElementById('order-' + name);
+    let qty = parseInt(input.value);
+    if (!qty || qty < 1) {
+        alert('Enter a valid quantity');
+        return;
+    }
+    // send to backend
+    try{
+        let res = await fetch('/api/orders', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({name, qty})
+        });
+        if(res.ok){
+            alert('Order placed. Admin will be notified.');
+            loadEquipments();
+        } else {
+            let err = await res.json();
+            alert('Error: '+err.error);
+        }
+    } catch(e){
+        console.error(e);
+        alert('Network error');
+    }
+}
+
+// load on page ready
+window.addEventListener('DOMContentLoaded', loadEquipments);
+</script>
+
+<footer>© 2026 PalliativeCare+</footer>
+</body>
+</html>

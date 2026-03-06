@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Volunteer Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav><h2>PalliativeCare+</h2><ul><li><a href="index.html">Home</a></li></ul></nav>
+
+<section class="container">
+<h2 class="section-title">Volunteer Dashboard</h2>
+
+<div class="dashboard">
+<div class="stat"><h3>Pending Deliveries</h3><p>3</p></div>
+<div class="stat"><h3>Equipment Managed</h3><p>15</p></div>
+</div>
+
+<form style="margin-top:40px;">
+<select>
+<option>Hospital Bed</option>
+<option>Wheelchair</option>
+</select>
+<select>
+<option>Available</option>
+<option>Unavailable</option>
+</select>
+<button class="btn secondary" onclick="volunteerLogin()">Login</button>
+<script>
+function volunteerLogin(){
+    alert("Volunteer dashboard access granted.");
+}
+</script>
+</form>
+
+</section>
+
+<footer>© 2026 PalliativeCare+</footer>
+</body>
+</html>

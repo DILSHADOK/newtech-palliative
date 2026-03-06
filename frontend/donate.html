@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Donate</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav><h2>PalliativeCare+</h2><ul><li><a href="index.html">Home</a></li></ul></nav>
+
+<section class="container">
+<h2 class="section-title">Make a Donation</h2>
+
+<div class="donation-box">
+  <form id="donationForm">
+    <label for="donorName">Name</label>
+    <input type="text" id="donorName" name="donorName" placeholder="Your name" required>
+
+    <label for="donorEmail">Email</label>
+    <input type="email" id="donorEmail" name="donorEmail" placeholder="you@example.com" required>
+
+    <label for="donationAmount">Amount (₹)</label>
+    <input type="number" id="donationAmount" name="donationAmount" min="1" placeholder="Enter amount" required>
+
+    <label for="donationMethod">Payment Method</label>
+    <select id="donationMethod" name="donationMethod" required>
+      <option value="" disabled selected>Select method</option>
+      <option>Credit/Debit Card</option>
+      <option>UPI</option>
+      <option>Net Banking</option>
+      <option>Cash</option>
+    </select>
+
+    <button type="submit" class="btn accent">Donate</button>
+  </form>
+</div>
+
+<section class="container">
+<h3 class="section-title">Recent Donations</h3>
+<ul id="donationHistory"></ul>
+</section>
+
+</section>
+
+<script>
+async function renderHistory(){
+    let list = document.getElementById('donationHistory');
+    list.innerHTML = '';
+    try{
+        let res = await fetch('/api/donations');
+        let history = await res.json();
+        if(history.length === 0) {
+            list.innerHTML = '<li>No donations yet.</li>';
+            return;
+        }
+        history.forEach(d => {
+            let li = document.createElement('li');
+            li.innerHTML = `<strong>${d.name}</strong> donated ₹${d.amount} via ${d.method} <small>(${new Date(d.time).toLocaleString()})</small>`;
+            list.appendChild(li);
+        });
+    } catch(e){
+        console.error(e);
+        list.innerHTML = '<li>Failed to load donations</li>';
+    }
+}
+
+document.getElementById('donationForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    if(!this.checkValidity()) return;
+    let name = document.getElementById('donorName').value;
+    let email = document.getElementById('donorEmail').value;
+    let amount = parseFloat(document.getElementById('donationAmount').value);
+    let method = document.getElementById('donationMethod').value;
+
+    try{
+        let res = await fetch('/api/donations', {
+            method: 'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({name,email,amount,method})
+        });
+        if(res.ok){
+            alert(`Thank you, ${name}! Your donation of ₹${amount} has been received.`);
+            renderHistory();
+            this.reset();
+        } else {
+            let err = await res.json();
+            alert('Error: '+err.error);
+        }
+    } catch(e){
+        console.error(e);
+        alert('Network error');
+    }
+});
+
+window.addEventListener('DOMContentLoaded', renderHistory);
+</script>
+
+<footer>© 2026 PalliativeCare+</footer>
+</body>
+</html>

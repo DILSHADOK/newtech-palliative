@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Equipment</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav><h2>PalliativeCare+</h2><ul><li><a href="index.html">Home</a></li></ul></nav>
+
+<section class="container">
+<h2 class="section-title">Equipment Availability</h2>
+
+<div class="grid" id="equipmentGrid">
+<div class="card">
+    <h3>hospital Bed</h3>
+    <p> <span class="badge green">Available</span><span id="Hospital Bed">1</span></p>
+</div>
+
+<div class="card">
+    <h3>Oxygen Cylinder</h3>
+    <p> <span class="badge green">Available</span><span id="Oxygen Cylinder">1</span></p>
+</div>
+
+</div>
+</section>
+<script>
+
+async function refreshEquipments(){
+    try{
+        let res = await fetch('/api/equipments');
+        let equipments = await res.json();
+        let grid = document.getElementById("equipmentGrid");
+        grid.innerHTML = `
+<div class="card">
+    <h3>hospital Bed</h3>
+    <p> <span class="badge green">Available</span><span id="Hospital Bed">0</span></p>
+</div>
+
+<div class="card">
+    <h3>Oxygen Cylinder</h3>
+    <p> <span class="badge green">Available</span><span id="Oxygen Cylinder">0</span></p>
+</div>
+`;
+        for(let name in equipments){
+            let qty = equipments[name];
+            let statusText = qty > 0 ? 'Available' : 'Unavailable';
+            let colorClass = qty > 0 ? 'green' : 'red';
+            let existing = document.getElementById(name);
+            if(existing){
+                existing.innerText = qty;
+                let badge = existing.parentElement.querySelector('.badge');
+                if(badge){
+                    badge.textContent = statusText;
+                    badge.className = 'badge ' + colorClass;
+                }
+            } else {
+                let card = document.createElement("div");
+                card.className = "card";
+                card.innerHTML = `
+<h3>${name}</h3>
+<p> <span class="badge ${colorClass}">${statusText}</span><span id="${name}">${qty}</span></p>
+`;
+                grid.appendChild(card);
+            }
+        }
+    } catch(e){
+        console.error('failed to load equipments', e);
+    }
+}
+
+window.addEventListener('DOMContentLoaded', refreshEquipments);
+
+</script>
+<footer>© 2026 PalliativeCare+</footer>
+</body>
+</html>

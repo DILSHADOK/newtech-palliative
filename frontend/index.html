@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Palliative Care Support</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav>
+  <h2>PalliativeCare+</h2>
+
+  <div class="menu-toggle" onclick="toggleMenu()">
+    ☰
+  </div>
+
+  <ul id="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="register_patient.html">Register Patient</a></li>
+    <li><a href="equipment.html">Equipment</a></li>
+    <li><a href="donate.html">Donate</a></li>
+    <li><a href="delivery.html">Delivery</a></li>
+    <li><a href="admin.html">Admin</a></li>
+  </ul>
+</nav>
+
+<section class="hero">
+<h1>Online Palliative Care Support System</h1>
+<p>Connecting Patients, Volunteers & Donors Efficiently</p>
+</section>
+
+<section class="container">
+<h2 class="section-title">Our Services</h2>
+
+<div class="grid">
+<div class="card">
+<h3>Patient Registration</h3>
+<p>Register patients who require palliative support.</p>
+<a href="register_patient.html" class="btn">Register</a>
+</div>
+
+<div class="card">
+<h3>Equipment Tracking</h3>
+<p>Check medical equipment availability.</p>
+<a href="equipment.html" class="btn secondary">View</a>
+</div>
+
+<div class="card">
+<h3>Donate Support</h3>
+<p>Support care units through contributions.</p>
+<a href="donate.html" class="btn accent">Donate</a>
+</div>
+</div>
+</section>
+
+<footer>© 2026 PalliativeCare+</footer>
+<script>
+function toggleMenu() {
+  const menu = document.getElementById("nav-links");
+  menu.classList.toggle("active");
+}
+</script>
+</body>
+</html>

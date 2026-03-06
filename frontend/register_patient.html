@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Register Patient</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<nav><h2>PalliativeCare+</h2><ul><li><a href="index.html">Home</a></li></ul></nav>
+
+<section class="container">
+<h2 class="section-title">Patient Registration</h2>
+
+<form id="patientForm" method="post">
+  <input id="patientName" type="text" name="patientName" placeholder="Patient Name" required>
+  <input id="patientAge" type="number" name="patientAge" placeholder="Age" required min="0">
+  <textarea id="patientCondition" name="patientCondition" placeholder="Medical Condition" required></textarea>
+  <textarea id="patientAddress" name="patientAddress" placeholder="Address" required></textarea>
+  <select id="patientPriority" name="patientPriority" required>
+    <option value="" disabled selected>Select Priority</option>
+    <option>Low Priority</option>
+    <option>Medium Priority</option>
+    <option>Critical Priority</option>
+  </select>
+  <button type="submit" class="btn">Register Patient</button>
+</form>
+<script>
+document.getElementById('patientForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    if(!this.checkValidity()){
+        alert("Please fill all fields before registering.");
+        return;
+    }
+    let data = {
+        name: document.getElementById('patientName').value,
+        age: parseInt(document.getElementById('patientAge').value),
+        condition: document.getElementById('patientCondition').value,
+        address: document.getElementById('patientAddress').value,
+        priority: document.getElementById('patientPriority').value
+    };
+    try{
+        let res = await fetch('/api/patients', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify(data)
+        });
+        if(res.ok){
+            alert("Patient Registered Successfully!");
+            this.reset();
+        } else {
+            let err = await res.json();
+            alert('Error: '+err.error);
+        }
+    } catch(e){
+        console.error(e);
+        alert('Network error');
+    }
+});
+</script>
+</section>
+
+<footer>© 2026 PalliativeCare+</footer>
+</body>
+</html> 
