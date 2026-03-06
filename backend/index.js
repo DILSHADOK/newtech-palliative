@@ -18,128 +18,171 @@ const db = {
 };
 
 // initialize tables
-db.serialize(() => {
-  db.run(`CREATE TABLE IF NOT EXISTS equipments (
-    name TEXT PRIMARY KEY,
-    qty INTEGER
-  )`);
+async function initDB() {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS equipments (
+        name TEXT PRIMARY KEY,
+        qty INTEGER
+      )
+    `);
 
-  db.run(`CREATE TABLE IF NOT EXISTS orders (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
-    qty INTEGER,
-    time TEXT
-  )`);
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS orders (
+        id SERIAL PRIMARY KEY,
+        name TEXT,
+        qty INTEGER,
+        time TEXT
+      )
+    `);
 
-  db.run(`CREATE TABLE IF NOT EXISTS donations (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
-    email TEXT,
-    amount REAL,
-    method TEXT,
-    time TEXT
-  )`);
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS donations (
+        id SERIAL PRIMARY KEY,
+        name TEXT,
+        email TEXT,
+        amount NUMERIC,
+        method TEXT,
+        time TEXT
+      )
+    `);
 
-  db.run(`CREATE TABLE IF NOT EXISTS patients (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
-    age INTEGER,
-    condition TEXT,
-    address TEXT,
-    priority TEXT,
-    time TEXT
-  )`);
-});
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS patients (
+        id SERIAL PRIMARY KEY,
+        name TEXT,
+        age INTEGER,
+        condition TEXT,
+        address TEXT,
+        priority TEXT,
+        time TEXT
+      )
+    `);
+
+    console.log('Database tables initialized');
+  } catch (err) {
+    console.error('Database initialization error:', err);
+  }
+}
+
+initDB();
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 // equipment routes
-app.get('/api/equipments', (req, res) => {
-  db.all('SELECT name, qty FROM equipments', (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(rows.reduce((acc, { name, qty }) => { acc[name] = qty; return acc; }, {}));
-  });
+app.get('/api/equipments', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT name, qty FROM equipments');
+    const equipments = result.rows.reduce((acc, { name, qty }) => { acc[name] = qty; return acc; }, {});
+    res.json(equipments);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-app.post('/api/equipments', (req, res) => {
-  const { name, qty } = req.body;
-  if (!name || typeof qty !== 'number') return res.status(400).json({ error: 'invalid' });
-  pool.query('INSERT INTO equipments (name,qty) VALUES ($1,$2) ON CONFLICT(name) DO UPDATE SET qty=qty+$2', [name, qty])
-    .then(() => res.json({ success: true }))
-    .catch(err => res.status(500).json({ error: err.message }));
+app.post('/api/equipments', async (req, res) => {
+  try {
+    const { name, qty } = req.body;
+    if (!name || typeof qty !== 'number') return res.status(400).json({ error: 'invalid' });
+    await pool.query('INSERT INTO equipments (name,qty) VALUES ($1,$2) ON CONFLICT(name) DO UPDATE SET qty=qty+$2', [name, qty]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-app.put('/api/equipments/:name', (req, res) => {
-  const name = req.params.name;
-  const { qty } = req.body;
-  if (typeof qty !== 'number') return res.status(400).json({ error: 'invalid' });
-  pool.query('UPDATE equipments SET qty=$1 WHERE name=$2', [qty, name])
-    .then(() => res.json({ success: true }))
-    .catch(err => res.status(500).json({ error: err.message }));
+app.put('/api/equipments/:name', async (req, res) => {
+  try {
+    const name = req.params.name;
+    const { qty } = req.body;
+    if (typeof qty !== 'number') return res.status(400).json({ error: 'invalid' });
+    await pool.query('UPDATE equipments SET qty=$1 WHERE name=$2', [qty, name]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // orders
-app.get('/api/orders', (req, res) => {
-  db.all('SELECT id,name,qty,time FROM orders', (err, rows) => {
-    if(err) return res.status(500).json({ error: err.message });
-    res.json(rows);
-  });
+app.get('/api/orders', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id,name,qty,time FROM orders');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-app.post('/api/orders', (req, res) => {
-  const { name, qty } = req.body;
-  if (!name || typeof qty !== 'number') return res.status(400).json({ error: 'invalid' });
-  const time = new Date().toISOString();
-  pool.query('INSERT INTO orders (name,qty,time) VALUES ($1,$2,$3) RETURNING id', [name, qty, time])
-    .then(result => res.json({ id: result.rows[0].id, name, qty, time }))
-    .catch(err => res.status(500).json({ error: err.message }));
+app.post('/api/orders', async (req, res) => {
+  try {
+    const { name, qty } = req.body;
+    if (!name || typeof qty !== 'number') return res.status(400).json({ error: 'invalid' });
+    const time = new Date().toISOString();
+    const result = await pool.query('INSERT INTO orders (name,qty,time) VALUES ($1,$2,$3) RETURNING id', [name, qty, time]);
+    res.json({ id: result.rows[0].id, name, qty, time });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-app.delete('/api/orders/:id', (req, res) => {
-  const id = req.params.id;
-  pool.query('DELETE FROM orders WHERE id=$1', [id])
-    .then(() => res.json({ success: true }))
-    .catch(err => res.status(500).json({ error: err.message }));
+app.delete('/api/orders/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
+    await pool.query('DELETE FROM orders WHERE id=$1', [id]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // donations
-app.get('/api/donations', (req, res) => {
-  db.all('SELECT id,name,email,amount,method,time FROM donations ORDER BY id DESC', (err, rows) => {
-    if(err) return res.status(500).json({ error: err.message });
-    res.json(rows);
-  });
+app.get('/api/donations', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id,name,email,amount,method,time FROM donations ORDER BY id DESC');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-app.post('/api/donations', (req, res) => {
-  const { name, email, amount, method } = req.body;
-  if (!name || !email || typeof amount !== 'number' || !method) {
-    return res.status(400).json({ error: 'invalid' });
+app.post('/api/donations', async (req, res) => {
+  try {
+    const { name, email, amount, method } = req.body;
+    if (!name || !email || typeof amount !== 'number' || !method) {
+      return res.status(400).json({ error: 'invalid' });
+    }
+    const time = new Date().toISOString();
+    const result = await pool.query('INSERT INTO donations (name,email,amount,method,time) VALUES ($1,$2,$3,$4,$5) RETURNING id', [name, email, amount, method, time]);
+    res.json({ id: result.rows[0].id, name, email, amount, method, time });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-  const time = new Date().toISOString();
-  pool.query('INSERT INTO donations (name,email,amount,method,time) VALUES ($1,$2,$3,$4,$5) RETURNING id', [name, email, amount, method, time])
-    .then(result => res.json({ id: result.rows[0].id, name, email, amount, method, time }))
-    .catch(err => res.status(500).json({ error: err.message }));
 });
 
 // patients
-app.get('/api/patients', (req, res) => {
-  db.all('SELECT id,name,age,condition,address,priority,time FROM patients ORDER BY id DESC', (err, rows) => {
-    if(err) return res.status(500).json({ error: err.message });
-    res.json(rows);
-  });
+app.get('/api/patients', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id,name,age,condition,address,priority,time FROM patients ORDER BY id DESC');
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
-app.post('/api/patients', (req, res) => {
-  const { name, age, condition, address, priority } = req.body;
-  if (!name || typeof age !== 'number' || !condition || !address || !priority) {
-    return res.status(400).json({ error: 'invalid' });
+app.post('/api/patients', async (req, res) => {
+  try {
+    const { name, age, condition, address, priority } = req.body;
+    if (!name || typeof age !== 'number' || !condition || !address || !priority) {
+      return res.status(400).json({ error: 'invalid' });
+    }
+    const time = new Date().toISOString();
+    const result = await pool.query('INSERT INTO patients (name,age,condition,address,priority,time) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id', [name, age, condition, address, priority, time]);
+    res.json({ id: result.rows[0].id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
-  const time = new Date().toISOString();
-  pool.query('INSERT INTO patients (name,age,condition,address,priority,time) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id', [name, age, condition, address, priority, time])
-    .then(result => res.json({ id: result.rows[0].id }))
-    .catch(err => res.status(500).json({ error: err.message }));
 });
 
 // dashboard stats
